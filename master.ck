@@ -5,7 +5,7 @@
 Machine.add(me.dir() + "Connect.ck");
 Machine.add(me.dir() + "Handshake.ck");
 Machine.add(me.dir() + "Behavior.ck");
-// Machine.add(me.dir() + "Analyze.ck");
+Machine.add(me.dir() + "Analyze.ck");
 
 // main script
 Machine.add(me.dir() + "animal.ck");
