@@ -1,6 +1,8 @@
 // tester.ck
 // quick script for finding good actuator values
 
+adc => Gain g => dac;
+
 // for assigning values from the command line
 50 => int speed;
 64 => int velocity;

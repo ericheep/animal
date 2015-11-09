@@ -4,13 +4,13 @@
 
 public class Analyze extends Chubgraph {
 
-    adc => Gain g => OnePole p => blackhole;
+    inlet => Gain g => OnePole p => blackhole;
     adc => g;
 
     3 => g.op;
     0.9999 => p.pole;
 
-    fun float rms {
+    fun float rms() {
         return p.last();
     }
 

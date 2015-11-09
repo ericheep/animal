@@ -6,8 +6,6 @@ public class Connect {
     SerialIO serial;
     SerialIO.list() @=> string list[];
 
-    [0, 1] @=> int notes[];
-
     // initialize
     fun void init() {
         int serial_port;
