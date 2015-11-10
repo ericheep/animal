@@ -5,13 +5,27 @@
 public class Analyze extends Chubgraph {
 
     inlet => Gain g => OnePole p => blackhole;
-    adc => g;
+    inlet => g;
 
+    // rms stuff
     3 => g.op;
     0.9999 => p.pole;
 
-    fun float rms() {
-        return p.last();
+    int solenoid;
+
+    fun void init(int idx) {
+        idx => solenoid;
     }
 
+    fun float decibel() {
+        return Std.rmstodb(p.last());
+    }
+
+    fun void plugIn() {
+        while (decibel() < 1) {
+            1::samp => now;
+        }
+        <<< "Solenoid", solenoid, "Active" >>>;
+        3::second => now;
+    }
 }
