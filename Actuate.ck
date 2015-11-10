@@ -1,29 +1,24 @@
-// Behavior.ck
-// animal behavior
+// Acuate.ck
 
-public class Behavior {
+public class Actuate {
 
     // static communication object
     Handshake h;
 
-    int breathing, solenoid;
-
-    fun void actuate(int velocity) {
-        h.talk.note(solenoid, velocity);
-    }
+    int solenoid;
 
     fun void init(int s) {
         s => solenoid;
     }
 
-    fun void hit(int vel) {
-        actuate(vel);
+    fun void hit(int velocity) {
+        h.talk.note(solenoid, velocity);
     }
 
     fun void straight(int velocity, dur speed, dur length) {
         (length/speed) $ int => int iterations;
         for (int i; i < iterations; i++) {
-            actuate(velocity);
+            hit(velocity);
             speed => now;
         }
     }
@@ -43,14 +38,14 @@ public class Behavior {
             if (i % div == 0) {
                 5::ms +=> speed;
             }
-            actuate(velocity);
+            hit(velocity);
             speed => now;
         }
         for (iterations/2 => int i; i > 0; i--) {
             if (i % div == 0) {
                 5::ms -=> speed;
             }
-            actuate(velocity);
+            hit(velocity);
             speed => now;
         }
     }

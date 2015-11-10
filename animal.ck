@@ -7,24 +7,23 @@ h.talk.init();
 2 => int NUM_ACTUATORS;
 
 // analyze
-Analyze a[NUM_ACTUATORS];
+Analyze ana[NUM_ACTUATORS];
 
 // behavior
-Behavior b[NUM_ACTUATORS];
+Actuate act[NUM_ACTUATORS];
 
 // sound chain
 Gain g[NUM_ACTUATORS];
 Dyno d[NUM_ACTUATORS];
 
 for (int i; i < NUM_ACTUATORS; i++) {
-    a[i].init(i);
-    b[i].init(i);
-    adc.chan(i) => a[i];
-    // testing routing
-    adc.chan(i) => g[i] => d[i] => dac.left;
-    adc.chan(i) => g[i] => d[i] => dac.right;
-    // performance routing
-    // adc.chan(i) => g[i] => d[i] => dac.chan(i);
+    ana[i].init(i);
+    act[i].init(i);
+    // analyze
+    adc.chan(i) => ana[i];
+    // left/right pan
+    adc.chan(i) => g[i] => d[i] => dac.chan(i);
+    // limiter
     d[i].limit();
 }
 
@@ -45,7 +44,7 @@ fun int stopwatch() {
 fun void bloodFlow(int idx) {
     <<< "~ bloodflow -", idx, "-", stopwatch() >>>;
     for (11.5 => float i; i > 6.0; i - 0.1 => i) {
-        b[idx].straight(5, i::ms, Math.random2(500, 1250)::ms);
+        act[idx].straight(5, i::ms, Math.random2(500, 1250)::ms);
     }
 }
 
@@ -56,7 +55,7 @@ fun void heartStart(int idx) {
     int intensity;
 
     // big hit
-    b[idx].hit(127);
+    act[idx].hit(127);
 
     Math.random2(190, 300)::ms => now;
 
@@ -65,24 +64,24 @@ fun void heartStart(int idx) {
         5 + intensity => int velocity;
 
         if (intensity < 5) {
-            b[idx].straight(5, Math.random2f(6.0, 11.5)::ms, iterations * (8 - intensity)::ms);
+            act[idx].straight(5, Math.random2f(6.0, 11.5)::ms, iterations * (8 - intensity)::ms);
         }
         else {
             for (iterations/2 => int i; i > 0; i--) {
-                b[idx].hit(velocity);
+                act[idx].hit(velocity);
                 (i + 5)::ms => now;
             }
         }
 
-        b[idx].hit(127);
+        act[idx].hit(127);
         Math.random2(400, 500)::ms => now;
 
         if (intensity < 5) {
-            b[idx].straight(5, Math.random2f(6.0, 11.5)::ms, iterations * (8 - intensity)::ms);
+            act[idx].straight(5, Math.random2f(6.0, 11.5)::ms, iterations * (8 - intensity)::ms);
         }
         else if (intensity < 7) {
             for (1 => int i; i < iterations/2; i++) {
-                b[idx].hit(velocity);
+                act[idx].hit(velocity);
                 (i + 5)::ms => now;
             }
         }
@@ -105,7 +104,7 @@ fun void heartPumping(int idx) {
         for (int i; i < 100 - Math.random2(8, 16); i++) {
             for (int j; j < 2; j++) {
                 if (j == idx) {
-                    b[idx].hit(50);
+                    act[idx].hit(50);
                 }
                 (40 + k)::ms => now;
             }
@@ -113,7 +112,7 @@ fun void heartPumping(int idx) {
         for (int i; i < Math.random2(2, 6); i++) {
             for (int j; j < 2; j++) {
                 if (j == idx) {
-                    b[idx].hit(50);
+                    act[idx].hit(50);
                 }
                 (45 + k)::ms => now;
             }
@@ -129,7 +128,7 @@ fun void cardiacArrest(int idx) {
     for (int i ;i < 50; i++) {
         for (int j; j < 2; j++) {
             if (j == idx) {
-                b[idx].hit(50);
+                act[idx].hit(50);
             }
             50::ms + i::ms => now;
         }
@@ -137,7 +136,7 @@ fun void cardiacArrest(int idx) {
     for (50 => int i ;i > 0; i--) {
         for (int j; j < 2; j++) {
             if (j == idx) {
-                b[idx].hit(50);
+                act[idx].hit(50);
             }
             50::ms + i::ms => now;
         }
@@ -145,7 +144,7 @@ fun void cardiacArrest(int idx) {
     while (die[0] < 2::second && die[1] < 2::second) {
         for (int j; j < 2; j++) {
             if (j == idx) {
-                b[idx].hit(50);
+                act[idx].hit(50);
             }
             50::ms + die[idx] => now;
         }
@@ -159,7 +158,7 @@ fun void decibelFilter(int idx) {
     float sum;
     decibel_filter[idx].size() => int cap;
     while (true) {
-        a[idx].decibel() => decibel_filter[idx][ctr];
+        ana[idx].decibel() => decibel_filter[idx][ctr];
         (ctr + 1) % cap => ctr;
         0 => sum;
         for (int i; i < cap; i++) {
@@ -181,7 +180,7 @@ fun void postMortem(int idx) {
     <<< "~ postMortem -", idx, "-", stopwatch() >>>;
     int ctr;
     while (decibel_average[idx] == 0) {
-        b[idx].envelope(15 + ctr, Math.random2(1, 4), 50::ms, 1000::ms);
+        act[idx].envelope(15 + ctr, Math.random2(1, 4), 50::ms, 1000::ms);
         if (ctr < 20) {
             ctr++;
         }
@@ -191,7 +190,7 @@ fun void postMortem(int idx) {
 
 // main program
 fun void life(int idx) {
-    a[idx].plugIn();
+    ana[idx].plugIn();
     bloodFlow(idx);
     heartStart(idx);
     heartPumping(idx);
