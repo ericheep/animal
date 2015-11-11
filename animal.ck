@@ -14,7 +14,6 @@ Actuate act[NUM_ACTUATORS];
 
 // sound chain
 Gain g[NUM_ACTUATORS];
-Dyno d[NUM_ACTUATORS];
 
 for (int i; i < NUM_ACTUATORS; i++) {
     ana[i].init(i);
@@ -22,9 +21,8 @@ for (int i; i < NUM_ACTUATORS; i++) {
     // analyze
     adc.chan(i) => ana[i];
     // left/right pan
-    adc.chan(i) => g[i] => d[i] => dac.chan(i);
-    // limiter
-    d[i].limit();
+    adc.chan(i) => g[i] => dac.left;
+    adc.chan(i) => g[i] => dac.right;
 }
 
 // vars
@@ -51,8 +49,7 @@ fun void bloodFlow(int idx) {
 fun void heartStart(int idx) {
     <<< "~ heartstart -", idx, "-", stopwatch() >>>;
 
-    int ctr;
-    int intensity;
+    int intensity, ctr;
 
     // big hit
     act[idx].hit(127);
@@ -125,26 +122,12 @@ fun void cardiacArrest(int idx) {
     spork ~ decibelFilter(idx);
 
     <<< "~ cardiacArrest -", idx, "-", stopwatch() >>>;
-    for (int i ;i < 50; i++) {
-        for (int j; j < 2; j++) {
-            if (j == idx) {
-                act[idx].hit(50);
-            }
-            50::ms + i::ms => now;
-        }
-    }
-    for (50 => int i ;i > 0; i--) {
-        for (int j; j < 2; j++) {
-            if (j == idx) {
-                act[idx].hit(50);
-            }
-            50::ms + i::ms => now;
-        }
-    }
     while (die[0] < 2::second && die[1] < 2::second) {
         for (int j; j < 2; j++) {
             if (j == idx) {
-                act[idx].hit(50);
+                if (Math.random2f(0.0, 1.0) < 0.85) {
+                    act[idx].hit(50);
+                }
             }
             50::ms + die[idx] => now;
         }
